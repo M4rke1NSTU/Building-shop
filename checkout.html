@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Оформление заказа</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <style>
+    body {
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin-top: 50px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      margin-bottom: 30px;
+    }
+
+    .table {
+      margin-bottom: 30px;
+    }
+
+    .table th, .table td {
+      vertical-align: middle;
+    }
+
+    .table img {
+      max-width: 80px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+    }
+
+    .btn-danger {
+      background-color: #660000;
+      border-color: #660000;
+    }
+
+    .btn-danger:hover {
+      background-color: #CC0000;
+      border-color: #CC0000;
+    }
+
+    .btn-secondary {
+      background-color: #333;
+      border-color: #333;
+    }
+
+    .btn-secondary:hover {
+      background-color: #555;
+      border-color: #555;
+    }
+
+    .btn-primary {
+      background-color: #003366;
+      border-color: #003366;
+    }
+
+    .btn-primary:hover {
+      background-color: #0066CC;
+      border-color: #0066CC;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Оформление заказа</h1>
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Главная страница</a>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <h2>Детали заказа</h2>
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th>Изображение</th>
+                <th>Тип</th>
+                <th>Бренд</th>
+                <th>Модель</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Итого</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+                <tr>
+                  <td><img src="{{ item.imageURL }}" alt="{{ item.model }}"></td>
+                  <td>{{ item.type }}</td>
+                  <td>{{ item.brand }}</td>
+                  <td>{{ item.model }}</td>
+                  <td>{{ item.price }}₽</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.total }}₽</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <h3 class="text-right">Общая сумма: {{ total_price }}₽</h3>
+      </div>
+      <div class="col-md-4">
+        <h2>Информация о доставке</h2>
+        <form id="checkout-form" action="{{ url_for('checkout') }}" method="post">
+          <div class="form-group">
+            <label for="name">Имя</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="address">Адрес</label>
+            <input type="text" class="form-control" id="address" name="address" required readonly>
+            <div id="map" style="width: 100%; height: 300px;"></div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Телефон</label>
+            <input type="tel" class="form-control" id="phone" name="phone" required>
+          </div>
+          <div class="form-group">
+            <label for="payment_method">Способ оплаты</label>
+            <select class="form-control" id="payment_method" name="payment_method" required>
+              <option value="">Выберите способ оплаты</option>
+              <option value="card">Банковская карта</option>
+              <option value="cash">Наличные</option>
+            </select>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary" id="submit-btn">Сформировать документ</button>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submit_order">Оформить заказ</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+  <div class="d-flex justify-content-between">
+  <button type="submit" class="btn btn-primary" id="submit">Оформить заказ</button>
+</div>
+  <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Заказ успешно оформлен!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время.
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Перейти на главную страницу</a>
+            </div>
+        </div>
+    </div>
+</div>
+  {% if show_success_modal %}
+<script>
+    $(document).ready(function() {
+        $('#successModal').modal('show');
+    });
+</script>
+{% endif %}
+</div>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=0d7d1e04-0ad7-4a44-ab50-56f8740917a2&lang=ru_RU" type="text/javascript"></script>
+    <script>
+ymaps.ready(function () {
+    var myMap = new ymaps.Map('map', {
+        center: [54.987162, 82.915031],
+        zoom: 16
+    });
+
+    var placemark = null;
+    var isValidAddress = false;
+
+    myMap.events.add('click', function (e) {
+        if (placemark === null) {
+            var coords = e.get('coords');
+            placemark = new ymaps.Placemark(coords, {
+                balloonContent: 'Выбранный адрес'
+            });
+
+            myMap.geoObjects.add(placemark);
+
+            ymaps.geocode(coords).then(function (res) {
+                var fullAddress = res.geoObjects.get(0).properties.get('text');
+                document.getElementById('address').value = fullAddress;
+
+                // Проверяем, что выбранный адрес является действительным
+                ymaps.geocode(fullAddress).then(function (res) {
+                    var geoObject = res.geoObjects.get(0);
+                    if (geoObject.properties.get('metaDataProperty.GeocoderMetaData.precision') === 'exact') {
+                        isValidAddress = true;
+                    } else {
+                        isValidAddress = false;
+                        alert('Пожалуйста, выберите адрес, расположенный на доме.');
+                    }
+                });
+            });
+        } else {
+            var newCoords = e.get('coords');
+            console.log(newCoords)
+            placemark.geometry.setCoordinates(newCoords);
+
+            ymaps.geocode(newCoords).then(function (res) {
+                var fullAddress = res.geoObjects.get(0).properties.get('text');
+                document.getElementById('address').value = fullAddress;
+
+                // Проверяем, что выбранный адрес является действительным
+                ymaps.geocode(fullAddress).then(function (res) {
+                    var geoObject = res.geoObjects.get(0);
+                    if (geoObject.properties.get('metaDataProperty.GeocoderMetaData.precision') === 'exact') {
+                        isValidAddress = true;
+                    } else {
+                        isValidAddress = false;
+                        alert('Пожалуйста, выберите адрес, расположенный на доме.');
+                    }
+                });
+            });
+        }
+    });
+
+    // Проверяем, что адрес является действительным перед отправкой формы
+
+});
+    $('form').submit(function (event) {
+      var paymentMethod = $('#payment_method').val();
+      if (!isValidAddress) {
+        event.preventDefault();
+        alert('Пожалуйста, выберите адрес, расположенный на доме.');
+      } else if (paymentMethod === 'cash') {
+        event.preventDefault();
+        $('#successModal').modal('show');
+      }
+    });
+    $('form').submit(function (event) {
+  var paymentMethod = $('#payment_method').val();
+  if (!isValidAddress) {
+    event.preventDefault();
+    alert('Пожалуйста, выберите адрес, расположенный на доме.');
+  } else if (paymentMethod === 'cash') {
+    event.preventDefault();
+    $('#successModal').modal('show');
+  } else {
+    // Отправка формы для других способов оплаты
+    this.submit();
+  }
+});
+    </script>
+</body>
+</html>

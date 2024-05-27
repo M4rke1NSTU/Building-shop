@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Подтверждение заказа</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Подтверждение заказа</h1>
+    <div class="row">
+      <div class="col-md-8">
+        <h2>Детали заказа</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Артикул</th>
+              <th>Изображение</th>
+              <th>Тип</th>
+              <th>Бренд</th>
+              <th>Модель</th>
+              <th>Цена</th>
+              <th>Количество</th>
+              <th>Итого</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order_items %}
+              <tr>
+                <td>{{ item.product_id }}</td>
+                <td><img src="{{ item.imageURL }}" alt="{{ item.model }}" width="50"></td>
+                <td>{{ item.type }}</td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.model }}</td>
+                <td>{{ item.price }}₽</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.total }}₽</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-4">
+        <h2>Информация о доставке</h2>
+        <p>Имя: {{ order_info[0] }}</p>
+        <p>Адрес: {{ order_info[1] }}</p>
+        <p>Телефон: {{ order_info[2] }}</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

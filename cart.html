@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Корзина</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .btn-danger {
+      background-color: #660000;
+      border-color: #660000;
+    }
+    .btn-danger:hover {
+      background-color: #CC0000;
+      border-color: #CC0000;
+    }
+    .btn-secondary {
+      background-color: #333;
+      border-color: #333;
+    }
+    .btn-secondary:hover {
+      background-color: #555;
+      border-color: #555;
+    }
+    .btn-primary {
+      background-color: #003366;
+      border-color: #003366;
+    }
+    .btn-primary:hover {
+      background-color: #0066CC;
+      border-color: #0066CC;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Строительные материалы</a>
+        <div class="navbar-nav ml-auto">
+          {% if 'user_id' in session %}
+            <a class="nav-link" href="{{ url_for('index') }}">Главная</a>
+            <a class="nav-link" href="{{ url_for('profile') }}">Привет, {{ current_user.username }}!</a>
+            <a class="nav-link" href="{{ url_for('cart') }}">Корзина</a>
+          {% else %}
+            <a class="nav-link" href="{{ url_for('index') }}">Главная</a>
+            <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
+            <a class="nav-link" href="{{ url_for('register') }}">Зарегистрироваться</a>
+            <a class="nav-link" href="{{ url_for('cart') }}">Корзина</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container my-5">
+    <h1>Корзина</h1>
+    {% if 'user_id' in session and cart_items %}
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+          <thead class="thead-dark">
+            <tr>
+              <th>Артикул</th>
+              <th>Тип</th>
+              <th>Бренд</th>
+              <th>Модель</th>
+              <th>Цена</th>
+              <th>Количество</th>
+              <th>Итого</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart_items %}
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.type }}</td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.model }}</td>
+                <td>{{ item.price }}₽</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price * item.quantity }}₽</td>
+                <td>
+                  <button class="btn btn-danger delete-from-cart" data-user-id="{{ session['user_id'] }}" data-product-id="{{ item.id }}">Удалить</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="row justify-content-end">
+        <div class="col-md-6">
+          <h3 class="mb-4">Общая сумма: {{ total_price }}₽</h3>
+          <div class="d-flex justify-content-end">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary mr-2">Продолжить покупки</a>
+            <a href="{{ url_for('checkout') }}" class="btn btn-primary">Оформить заказ</a>
+          </div>
+        </div>
+      </div>
+    {% elif 'user_id' in session and not cart_items %}
+      <div class="text-center mt-5">
+        <h2>Корзина пуста</h2>
+        <p>Вы ещё не добавили ни одного товара в корзину.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Перейти к покупкам</a>
+      </div>
+    {% else %}
+      <p>Вы не авторизованы. Пожалуйста, <a href="{{ url_for('login') }}">войдите</a> в систему.</p>
+    {% endif %}
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $('.delete-from-cart').click(function() {
+        var userId = $(this).data('user-id');
+        var productId = $(this).data('product-id');
+
+        $.ajax({
+          url: '{{ url_for("delete_from_cart") }}',
+          type: 'POST',
+          data: {
+            user_id: userId,
+            product_id: productId
+          },
+          success: function(data) {
+            alert(data.message);
+            location.reload();
+          },
+          error: function(xhr, status, error) {
+            alert(xhr.responseJSON.error);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

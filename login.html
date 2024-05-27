@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Вход</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <header class="bg-dark text-white py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('index') }}" class="text-white font-weight-bold">Строительные материалы</a>
+            <nav>
+                {% if current_user %}
+                    <p class="mb-0 mr-3">Привет, <a href="{{ url_for('profile') }}" class="text-white">{{ current_user.username }}!</a></p>
+                    <a href="{{ url_for('cart') }}" class="btn btn-outline-light">Корзина</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light mr-2">Войти</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-light mr-2">Зарегистрироваться</a>
+                    <a href="{{ url_for('cart') }}" class="btn btn-outline-light">Корзина</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Вход</h2>
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">{{ error }}</div>
+                        {% endif %}
+                        <form method="post">
+                            <div class="form-group">
+                                <input type="email" name="email" class="form-control" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+                            </div>
+                            <button type="submit" class="btn btn-dark btn-block">Войти</button>
+                        </form>
+                        <p class="text-center mt-3">Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</body>
+</html>

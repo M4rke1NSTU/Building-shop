@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Профиль пользователя</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('index') }}">Строительные материалы</a>
+                <div class="navbar-nav ml-auto">
+                    <a class="btn btn-outline-light mr-2" href="{{ url_for('index') }}">Главная</a>
+                    <a class="btn btn-outline-light mr-2" href="{{ url_for('cart') }}">Корзина</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Выйти</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-9">
+            <h2 class="font-weight-bold mb-4">Профиль пользователя</h2>
+            <div class="card">
+                <div class="card-body d-flex align-items-center">
+                  <div class="profile-picture mr-4 rounded-circle" style="width: 150px; height: 150px; background-image: url({{ user.avatar_url }}); background-size: cover; background-position: center; border: 3px solid #333;"></div>
+                        <div class="profile-details">
+                            <p class="mb-2"><strong>Имя пользователя:</strong> {{ user.username }}</p>
+                            <p class="mb-2"><strong>Электронная почта:</strong> {{ user.email }}</p>
+                            <p class="mb-2"><strong>Количество заказов:</strong> {{ orders }}</p>
+                            <div>
+                                <button class="btn btn-dark btn-sm " data-toggle="modal" data-target="#uploadAvatarModal">Загрузить фото</button>
+                                <button class="btn btn-dark btn-sm btn-edit">Изменить данные</button>
+                                <button class="btn btn-dark btn-sm btn-change-password">Изменить пароль</button>
+                                <a href="{{ url_for('order_history') }}" class="btn btn-dark btn-sm">История заказов</a>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal для загрузки аватара -->
+<div class="modal fade" id="uploadAvatarModal" tabindex="-1" aria-labelledby="uploadAvatarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadAvatarModalLabel">Загрузить новое фото</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="avatarForm" action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="avatarInput">Выберите новое фото</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="avatarInput" name="avatar">
+                            <label class="custom-file-label" for="avatarInput">Выберите файл</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark" id="uploadAvatarButton">Загрузить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal для редактирования профиля -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Изменить данные профиля</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" action="{{ url_for('update_profile') }}" method="post">
+                    <div class="form-group">
+                        <label for="usernameInput">Имя пользователя</label>
+                        <input type="text" class="form-control" id="usernameInput" name="username" value="{{ user.username }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailInput">Электронная почта</label>
+                        <input type="email" class="form-control" id="emailInput" name="email" value="{{ user.email }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark" id="saveProfileButton">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal для изменения пароля -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Изменить пароль</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" action="{{ url_for('change_password') }}" method="post">
+                    <div class="form-group">
+                        <label for="currentPasswordInput">Текущий пароль</label>
+                        <input type="password" class="form-control" id="currentPasswordInput" name="current_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPasswordInput">Новый пароль</label>
+                        <input type="password" class="form-control" id="newPasswordInput" name="new_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPasswordInput">Подтвердите новый пароль</label>
+                        <input type="password" class="form-control" id="confirmPasswordInput" name="confirm_password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-dark" id="savePasswordButton">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+// Обработчик события для кнопки загрузки аватара
+$('.btn-upload').on('click', function() {
+    $('#uploadAvatarModal').modal('show');
+});
+
+// Обработчик события для кнопки "Изменить данные"
+$('.btn-edit').on('click', function() {
+    $('#editProfileModal').modal('show');
+});
+
+// Обработчик события для кнопки "Изменить пароль"
+$('.btn-change-password').on('click', function() {
+    $('#changePasswordModal').modal('show');
+});
+
+// Обработчик события для кнопки "Сохранить" в модальном окне редактирования профиля
+$('#saveProfileButton').on('click', function() {
+    $('#editProfileForm').submit();
+});
+
+// Обработчик события для кнопки "Сохранить" в модальном окне изменения пароля
+$('#savePasswordButton').on('click', function() {
+    $('#changePasswordForm').submit();
+});
+
+// Обработчик события для кнопки загрузки аватара в модальном окне
+$('#uploadAvatarButton').on('click', function() {
+    // Получение выбранного файла
+    var file = $('#avatarInput')[0].files[0];
+    if (file) {
+        // Создание URL-адреса изображения
+        var imageUrl = URL.createObjectURL(file);
+        // Обновление аватарки на странице
+        $('.profile-picture').css('background-image', 'url(' + imageUrl + ')');
+        // Закрытие модального окна
+        $('#uploadAvatarModal').modal('hide');
+    }
+});
+    </script>
+
+</body>
+</html>
